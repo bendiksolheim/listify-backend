@@ -1,0 +1,84 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses      #-}
+{-# LANGUAGE OverloadedStrings          #-}
+
+module Lib where
+
+import           Control.Applicative                  (Applicative)
+import           Control.Monad.IO.Class               (MonadIO, liftIO)
+import           Control.Monad.Logger                 (runStdoutLoggingT)
+import           Control.Monad.Reader                 (asks)
+import           Control.Monad.Reader.Class           (MonadReader)
+import           Control.Monad.Trans.Class            (MonadTrans, lift)
+import           Control.Monad.Trans.Reader           (ReaderT, runReaderT)
+import           Data.Monoid                          ((<>))
+import           Data.Pool                            ()
+import qualified Data.Text.Lazy                       as T
+import           Database.Persist.Postgresql          as DB
+import           Models.Models
+import           Network.Wai.Middleware.RequestLogger (logStdoutDev)
+import qualified Web.Scotty                           ()
+import           Web.Scotty.Trans                     as S
+
+data Config = Config { getPool :: ConnectionPool }
+
+newtype ConfigM a = ConfigM
+  { runConfigM :: ReaderT Config IO a
+  } deriving (Applicative, Functor, Monad, MonadIO, MonadReader Config)
+
+type Error = T.Text
+
+doMigrations :: ReaderT SqlBackend IO ()
+doMigrations = runMigration migrateAll
+
+doDbStuff :: ReaderT SqlBackend IO ()
+doDbStuff = do
+  milkId   <- insert $ Item "Milk" 1
+  cookieId <- insert $ Item "Cookie" 2
+
+  items <- selectList ([] :: [Filter Item]) []
+  liftIO $ print items
+
+  milk <- DB.get milkId
+  liftIO $ print milk
+
+runDb :: (MonadTrans t, MonadIO (t ConfigM)) => SqlPersistT IO a -> t ConfigM a
+runDb query = do
+  pool <- lift $ asks getPool
+  liftIO (runSqlPool query pool)
+-- dbFunction query = runStderrLoggingT $
+--   withPostgresqlPool connectionString 10 $
+--   \pool -> liftIO $ runSqlPersistMPool query pool
+
+connectionString :: ConnectionString
+connectionString = "host=localhost dbname=listify user=test password=test port=5432"
+
+runApplication :: IO ()
+runApplication = do
+  pool <- runStdoutLoggingT $ createPostgresqlPool connectionString 10
+  let cfg = Config { getPool = pool }
+  let r = flip runReaderT cfg . runConfigM
+  scottyT 3000 r routes
+
+
+routes :: ScottyT T.Text ConfigM ()
+routes = do
+  runDb doMigrations
+  runDb doDbStuff
+  middleware logStdoutDev
+  S.get "/" $ html "Hello, world"
+  S.get "/items" items
+
+items :: ActionT T.Text ConfigM ()
+items = do
+  items <- runDb (selectList [] [])
+  html $ "Items: " <> T.pack (show (length (items ::[Entity Item])))
+-- runApplication :: IO ()
+-- runApplication = S.scotty 3000 $ do
+--     S.middleware logStdoutDev
+--     dbFunction doMigrations
+--     dbFunction doDbStuff
+--     S.get "/" $ S.html "Hello, world"
+--     S.get "/items" $ do
+--       posts <- dbFunction $ selectList ([] :: [Filter Item]) []
+--       S.html ("Posts: " <> T.pack (show $ length posts))

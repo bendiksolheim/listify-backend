@@ -1,0 +1,52 @@
+name:                listify-backend
+version:             0.0.1
+synopsis:            Initial project template from stack
+description:         Please see README.md
+homepage:            http://github.com/bendiksolheim/listify-backend
+license:             BSD3
+license-file:        LICENSE
+author:              Bendik Solheim
+maintainer:          bendik@solheim.im
+copyright:           2015 Bendik Solheim
+category:            Web
+build-type:          Simple
+-- extra-source-files:
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Lib
+                     , Models.Models
+  build-depends:       base >= 4.7 && < 5
+                     , monad-logger
+                     , mtl
+                     , persistent
+                     , persistent-postgresql
+                     , persistent-template
+                     , resource-pool
+                     , text
+                     , transformers
+                     , scotty
+                     , wai-extra
+  default-language:    Haskell2010
+
+executable listify-backend
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  build-depends:       base
+                     , listify-backend
+  default-language:    Haskell2010
+
+test-suite listify-backend-test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+  build-depends:       base
+                     , listify-backend
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/githubuser/listify-backend
