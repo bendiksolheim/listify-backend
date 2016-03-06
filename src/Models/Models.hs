@@ -25,5 +25,9 @@ initialize :: ConnectionPool -> IO ()
 initialize pool = flip runSqlPool pool $ runMigration migrateAll
 
 listItems :: ConnectionPool -> IO [Entity Item]
---listItemsH pool = (flip runSqlPool pool $ selectList [] []) :: [Entity Item]
 listItems = runSqlPool (selectList ([] :: [Filter Item]) [])
+
+insertItem :: ConnectionPool -> Item -> IO (Maybe Item)
+insertItem pool item = do
+  itemId <- runSqlPool (insert item) pool
+  runSqlPool (get itemId) pool
