@@ -31,7 +31,7 @@ getItemH pool = do
 
 createItemH :: ConnectionPool -> ActionM ()
 createItemH pool = do
-  item :: Item <- jsonData
+  item         <- jsonData
   insertedItem <- liftIO $ insertItem pool item
   json insertedItem
 

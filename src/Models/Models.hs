@@ -23,7 +23,7 @@ Item json
 |]
 
 intToKey :: ToBackendKey SqlBackend a => Integer -> Key a
-intToKey intId = toSqlKey (fromIntegral (intId :: Integer))
+intToKey intId = toSqlKey $ fromIntegral intId
 
 initialize :: ConnectionPool -> IO ()
 initialize pool = flip runSqlPool pool $ runMigration migrateAll
