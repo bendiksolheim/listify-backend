@@ -23,6 +23,12 @@ getItemsH pool = do
   items <- liftIO $ listItems pool
   json items
 
+getItemH :: ConnectionPool -> ActionM ()
+getItemH pool = do
+  itemId <- param "id"
+  item   <- liftIO $ getItem pool itemId
+  json item
+
 createItemH :: ConnectionPool -> ActionM ()
 createItemH pool = do
   item :: Item <- jsonData
@@ -34,6 +40,7 @@ routes pool = do
   get  "/" getIndexH
   get  "/items" (getItemsH pool)
   post "/items" (createItemH pool)
+  get  "/items/:id" (getItemH pool)
 
 runApplication :: IO ()
 runApplication =

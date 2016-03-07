@@ -8,6 +8,7 @@
 {-# LANGUAGE ScopedTypeVariables        #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
+{-# LANGUAGE FlexibleContexts           #-}
 
 module Models.Models where
 
@@ -21,6 +22,9 @@ Item json
     deriving Show
 |]
 
+intToKey :: ToBackendKey SqlBackend a => Integer -> Key a
+intToKey intId = toSqlKey (fromIntegral (intId :: Integer))
+
 initialize :: ConnectionPool -> IO ()
 initialize pool = flip runSqlPool pool $ runMigration migrateAll
 
@@ -31,3 +35,6 @@ insertItem :: ConnectionPool -> Item -> IO (Maybe Item)
 insertItem pool item = do
   itemId <- runSqlPool (insert item) pool
   runSqlPool (get itemId) pool
+
+getItem :: ConnectionPool -> Integer -> IO (Maybe Item)
+getItem pool intId = flip runSqlPool pool . get . intToKey $ intId
