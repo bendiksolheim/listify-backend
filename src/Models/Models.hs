@@ -12,7 +12,6 @@
 
 module Models.Models where
 
--- import           Database.Persist.Sql
 import           Database.Persist.TH
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
