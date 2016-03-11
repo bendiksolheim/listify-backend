@@ -48,6 +48,11 @@ getItemH = do
   item <- runDb $ DB.get $ toSqlKey itemId
   json (item :: Maybe Item)
 
+deleteItemH :: Action
+deleteItemH = do
+  itemId <- param "id"
+  runDb $ DB.delete (toSqlKey itemId :: ItemId)
+
 createItemH :: Action
 createItemH = do
   item <- jsonData
@@ -56,7 +61,6 @@ createItemH = do
   json insertedItem
 
 runDb :: (MonadTrans t, MonadIO (t ConfigM)) => SqlPersistT IO a -> t ConfigM a
--- runDb :: (MonadIO m, MonadReader Config m) => SqlPersistT IO b -> m b
 runDb query = do
   pool <- lift $ asks getPool
   liftIO $ runSqlPool query pool
@@ -68,6 +72,7 @@ routes = do
   S.get  "/items" getItemsH
   S.post "/items" createItemH
   S.get  "/items/:id" getItemH
+  S.delete "/items/:id" deleteItemH
 
 doMigration :: ReaderT SqlBackend IO ()
 doMigration = DB.runMigration migrateAll
