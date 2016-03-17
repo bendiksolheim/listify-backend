@@ -1,81 +1,35 @@
 {-# LANGUAGE FlexibleContexts           #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE ScopedTypeVariables        #-}
+{-# LANGUAGE OverloadedStrings          #-}
 
 module Lib where
 
-import           Control.Monad.IO.Class               (MonadIO, liftIO)
 import           Control.Monad.Logger                 (runStdoutLoggingT)
-import           Control.Monad.Reader                 (asks)
-import           Control.Monad.Reader.Class           (MonadReader)
-import           Control.Monad.Trans.Class            (MonadTrans, lift)
-import           Control.Monad.Trans.Reader           (ReaderT, runReaderT)
-import qualified Data.Text.Lazy                       as T
-import           Database.Persist.Postgresql          as DB
+import           Control.Monad.Trans.Reader           (runReaderT)
+import           Database.Persist.Postgresql
 
 import qualified Web.Scotty                           ()
 import           Web.Scotty.Trans                     as S
 
 import           Network.Wai.Middleware.RequestLogger (logStdoutDev)
 
-import           Models.Models
+import           Database
 
-data Config = Config { getPool :: DB.ConnectionPool }
-
-newtype ConfigM a = ConfigM
-  { runConfigM :: ReaderT Config IO a
-  } deriving (Applicative, Functor, Monad,
-              MonadIO, MonadReader Config)
-
-type Error = T.Text
-type Action = ActionT Error ConfigM ()
 
 connStr :: ConnectionString
 connStr = "host=localhost dbname=listify user=test password=test port=5432"
 
-getIndexH :: Action
-getIndexH = html "Hello, world"
-
-getItemsH :: Action
-getItemsH = do
-  items <- runDb $ DB.selectList [] []
-  json (items :: [Entity Item])
-
-getItemH :: Action
-getItemH = do
-  itemId <- param "id"
-  item <- runDb $ DB.get $ toSqlKey itemId
-  json (item :: Maybe Item)
-
-deleteItemH :: Action
-deleteItemH = do
-  itemId <- param "id"
-  runDb $ DB.delete (toSqlKey itemId :: ItemId)
-
-createItemH :: Action
-createItemH = do
-  item <- jsonData
-  itemId <- runDb $ insert (item :: Item)
-  insertedItem <- runDb $ DB.get itemId
-  json insertedItem
-
-runDb :: (MonadTrans t, MonadIO (t ConfigM)) => SqlPersistT IO a -> t ConfigM a
-runDb query = do
-  pool <- lift $ asks getPool
-  liftIO $ runSqlPool query pool
-
 routes :: ScottyT Error ConfigM ()
 routes = do
   middleware logStdoutDev
-  S.get  "/" getIndexH
-  S.get  "/items" getItemsH
-  S.post "/items" createItemH
-  S.get  "/items/:id" getItemH
+  S.get    "/" getIndexH
+  S.get    "/lists" getListsH
+  S.post   "/lists" createListH
+  S.get    "/lists/:id" getListH
+  S.get    "/items" getItemsH
+  S.post   "/items" createItemH
+  S.get    "/items/:id" getItemH
   S.delete "/items/:id" deleteItemH
-
-doMigration :: ReaderT SqlBackend IO ()
-doMigration = DB.runMigration migrateAll
 
 runApplication :: IO ()
 runApplication = do
