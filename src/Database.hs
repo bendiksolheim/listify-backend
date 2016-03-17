@@ -9,7 +9,7 @@ import           Control.Monad.IO.Class               (MonadIO, liftIO)
 import           Control.Monad.Reader                 (asks)
 import           Control.Monad.Trans.Reader           (ReaderT)
 import           Control.Monad.Reader.Class           (MonadReader)
-import           Web.Scotty.Trans                     as S
+import           Web.Scotty.Trans
 import           Database.Persist.Postgresql          as DB
 import           Models.Models
 
