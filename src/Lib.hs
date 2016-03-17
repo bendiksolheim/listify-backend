@@ -21,17 +21,17 @@ connStr = "host=localhost dbname=listify user=test password=test port=5432"
 routes :: ScottyT Error ConfigM ()
 routes = do
   middleware logStdoutDev
-  get    "/" getIndexH
+  get    "/" getIndex
 
-  get    "/lists" getListsH
-  post   "/lists" createListH
-  get    "/lists/:id" getListH
-  delete "/lists/:id" deleteListH
+  get    "/lists" getLists
+  post   "/lists" createList
+  get    "/lists/:id" getList
+  delete "/lists/:id" deleteList
 
-  get    "/items" getItemsH
-  post   "/items" createItemH
-  get    "/items/:id" getItemH
-  delete "/items/:id" deleteItemH
+  get    "/items" getItems
+  post   "/items" createItem
+  get    "/items/:id" getItem
+  delete "/items/:id" deleteItem
 
 runApplication :: IO ()
 runApplication = do

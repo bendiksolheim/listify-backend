@@ -23,50 +23,50 @@ newtype ConfigM a = ConfigM
 type Error = T.Text
 type Action = ActionT Error ConfigM ()
 
-getIndexH :: Action
-getIndexH = html "Hello, world"
+getIndex :: Action
+getIndex = html "Hello, world"
 
-getListsH :: Action
-getListsH = do
+getLists :: Action
+getLists = do
   lists <- runDb $ DB.selectList [] []
   json (lists :: [Entity List])
 
-createListH :: Action
-createListH = do
+createList :: Action
+createList = do
   list <- jsonData
   listId <- runDb $ insert (list :: List)
   insertedList <- runDb $ DB.get listId
   json insertedList
 
-getListH :: Action
-getListH = do
+getList :: Action
+getList = do
   listId <- param "id"
   list <- runDb $ DB.get $ toSqlKey listId
   json (list :: Maybe List)
 
-deleteListH :: Action
-deleteListH = do
+deleteList :: Action
+deleteList = do
   listId <- param "id"
   runDb $ DB.delete (toSqlKey listId :: ListId)
 
-getItemsH :: Action
-getItemsH = do
+getItems :: Action
+getItems = do
   items <- runDb $ DB.selectList [] []
   json (items :: [Entity Item])
 
-getItemH :: Action
-getItemH = do
+getItem :: Action
+getItem = do
   itemId <- param "id"
   item <- runDb $ DB.get $ toSqlKey itemId
   json (item :: Maybe Item)
 
-deleteItemH :: Action
-deleteItemH = do
+deleteItem :: Action
+deleteItem = do
   itemId <- param "id"
   runDb $ DB.delete (toSqlKey itemId :: ItemId)
 
-createItemH :: Action
-createItemH = do
+createItem :: Action
+createItem = do
   item <- jsonData
   itemId <- runDb $ insert (item :: Item)
   insertedItem <- runDb $ DB.get itemId
