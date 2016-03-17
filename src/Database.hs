@@ -44,6 +44,11 @@ getListH = do
   list <- runDb $ DB.get $ toSqlKey listId
   json (list :: Maybe List)
 
+deleteListH :: Action
+deleteListH = do
+  listId <- param "id"
+  runDb $ DB.delete (toSqlKey listId :: ListId)
+
 getItemsH :: Action
 getItemsH = do
   items <- runDb $ DB.selectList [] []

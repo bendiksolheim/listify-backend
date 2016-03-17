@@ -22,9 +22,12 @@ routes :: ScottyT Error ConfigM ()
 routes = do
   middleware logStdoutDev
   get    "/" getIndexH
+
   get    "/lists" getListsH
   post   "/lists" createListH
   get    "/lists/:id" getListH
+  delete "/lists/:id" deleteListH
+
   get    "/items" getItemsH
   post   "/items" createItemH
   get    "/items/:id" getItemH
