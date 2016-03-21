@@ -11,6 +11,7 @@ import           Database.Persist.Postgresql          (ConnectionString,
                                                        runSqlPool)
 import           Web.Scotty.Trans
 import           Network.Wai.Middleware.RequestLogger (logStdoutDev)
+import           Network.HTTP.Types.Status            (notFound404)
 
 import           Database
 
@@ -32,6 +33,8 @@ routes = do
   post   "/items" createItem
   get    "/items/:id" getItem
   delete "/items/:id" deleteItem
+
+  notFound $ status notFound404
 
 runApplication :: IO ()
 runApplication = do
