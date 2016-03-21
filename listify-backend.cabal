@@ -19,6 +19,7 @@ library
                      , Database
                      , Models.Models
   build-depends:       base >= 4.7 && < 5
+                     , aeson
                      , monad-logger
                      , mtl
                      , persistent
