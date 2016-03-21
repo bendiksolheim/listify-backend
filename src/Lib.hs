@@ -25,7 +25,7 @@ routes = do
 
   get    "/lists" getLists
   post   "/lists" createList
-  get    "/lists/:id" getList
+  get    "/lists/:id" getListWithItems
   delete "/lists/:id" deleteList
 
   get    "/items" getItems
