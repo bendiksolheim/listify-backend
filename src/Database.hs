@@ -1,5 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
+{-# LANGUAGE ScopedTypeVariables        #-}
 
 module Database where
 
@@ -71,6 +72,13 @@ createItem = do
   itemId <- runDb $ insert (item :: Item)
   insertedItem <- runDb $ DB.get itemId
   json insertedItem
+
+getListWithItems :: Action
+getListWithItems = do
+  listId <- param "id"
+  l :: Maybe List <- runDb $ DB.get $ toSqlKey listId
+  i :: [Entity Item] <- runDb $ DB.selectList [ItemList ==. toSqlKey listId] []
+  json $ ListWithItems l i
 
 doMigration :: ReaderT SqlBackend IO ()
 doMigration = DB.runMigration migrateAll
