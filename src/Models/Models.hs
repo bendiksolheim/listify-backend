@@ -9,10 +9,14 @@
 {-# LANGUAGE ScopedTypeVariables        #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
+{-# LANGUAGE DeriveGeneric              #-}
 
 module Models.Models where
 
+import           GHC.Generics
 import           Database.Persist.TH
+import           Data.Aeson
+import           Database.Persist.Postgresql (Entity)
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 List json
@@ -24,3 +28,10 @@ Item json
     list ListId
     deriving Show
 |]
+
+data ListWithItems = ListWithItems
+  { list :: Maybe List
+  , items :: [Entity Item]
+  } deriving (Show, Generic)
+
+instance ToJSON ListWithItems
