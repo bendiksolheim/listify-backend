@@ -4,16 +4,16 @@
 
 module Database where
 
-import qualified Data.Text.Lazy                       as T
-import           Data.Aeson                           (object, (.=), Value)
-import           Control.Monad.Trans.Class            (MonadTrans, lift)
-import           Control.Monad.IO.Class               (MonadIO, liftIO)
-import           Control.Monad.Reader                 (asks)
-import           Control.Monad.Trans.Reader           (ReaderT)
-import           Control.Monad.Reader.Class           (MonadReader)
+import           Control.Monad.IO.Class      (MonadIO, liftIO)
+import           Control.Monad.Reader        (asks)
+import           Control.Monad.Reader.Class  (MonadReader)
+import           Control.Monad.Trans.Class   (MonadTrans, lift)
+import           Control.Monad.Trans.Reader  (ReaderT)
+import           Data.Aeson                  (Value, object, (.=))
+import qualified Data.Text.Lazy              as T
+import           Database.Persist.Postgresql as DB
+import           Network.HTTP.Types.Status   (notFound404)
 import           Web.Scotty.Trans
-import           Network.HTTP.Types.Status            (notFound404)
-import           Database.Persist.Postgresql          as DB
 
 import           Models.Models
 

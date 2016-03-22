@@ -9,9 +9,9 @@ import           Control.Monad.Trans.Reader           (runReaderT)
 import           Database.Persist.Postgresql          (ConnectionString,
                                                        createPostgresqlPool,
                                                        runSqlPool)
-import           Web.Scotty.Trans
-import           Network.Wai.Middleware.RequestLogger (logStdoutDev)
 import           Network.HTTP.Types.Status            (notFound404)
+import           Network.Wai.Middleware.RequestLogger (logStdoutDev)
+import           Web.Scotty.Trans
 
 import           Database
 
