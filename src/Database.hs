@@ -82,11 +82,12 @@ listWithItems l i = object ["name" .= listName l, "items" .= i]
 getListWithItems :: Action
 getListWithItems = do
   listId <- param "id"
-  ml :: Maybe List <- runDb $ DB.get $ toSqlKey listId
-  i :: [Entity Item] <- runDb $ DB.selectList [ItemList ==. toSqlKey listId] []
-  case ml of
-    Just l  -> json $ listWithItems l i
-    Nothing -> status notFound404
+  ml <- runDb $ DB.get $ toSqlKey listId
+  l <- case ml of
+    Just l -> return l
+    Nothing -> next
+  i <- runDb $ DB.selectList [ItemList ==. toSqlKey listId] []
+  json $ listWithItems l i
 
 doMigration :: ReaderT SqlBackend IO ()
 doMigration = DB.runMigration migrateAll
