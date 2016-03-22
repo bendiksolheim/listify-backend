@@ -5,13 +5,16 @@
 module Database where
 
 import qualified Data.Text.Lazy                       as T
+import           Data.Aeson                           (object, (.=), Value)
 import           Control.Monad.Trans.Class            (MonadTrans, lift)
 import           Control.Monad.IO.Class               (MonadIO, liftIO)
 import           Control.Monad.Reader                 (asks)
 import           Control.Monad.Trans.Reader           (ReaderT)
 import           Control.Monad.Reader.Class           (MonadReader)
 import           Web.Scotty.Trans
+import           Network.HTTP.Types.Status            (notFound404)
 import           Database.Persist.Postgresql          as DB
+
 import           Models.Models
 
 data Config = Config { getPool :: DB.ConnectionPool }
@@ -73,12 +76,17 @@ createItem = do
   insertedItem <- runDb $ DB.get itemId
   json insertedItem
 
+listWithItems :: List -> [Entity Item] -> Value
+listWithItems l i = object ["name" .= listName l, "items" .= i]
+
 getListWithItems :: Action
 getListWithItems = do
   listId <- param "id"
-  l :: Maybe List <- runDb $ DB.get $ toSqlKey listId
+  ml :: Maybe List <- runDb $ DB.get $ toSqlKey listId
   i :: [Entity Item] <- runDb $ DB.selectList [ItemList ==. toSqlKey listId] []
-  json $ ListWithItems l i
+  case ml of
+    Just l  -> json $ listWithItems l i
+    Nothing -> status notFound404
 
 doMigration :: ReaderT SqlBackend IO ()
 doMigration = DB.runMigration migrateAll
